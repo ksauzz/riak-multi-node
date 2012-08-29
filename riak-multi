@@ -47,10 +47,11 @@ create_nodes(){
       sed "s|riak@127.0.0.1|riak${i}@127.0.0.1|" \
       > $ROOT/nodes/$i/etc/vm.args
 
+    incr=$((($i-1)*100))
     cat $riak_home/etc/app.config  |\
-      sed "s|8087|$((8087-1+$i*100))|g" |\
-      sed "s|8098|$((8098-1+$i*100))|g" |\
-      sed "s|8099|$((8099-1+$i*100))|g" \
+      sed "s|8087|$((8087 + $incr))|g" |\
+      sed "s|8098|$((8098 + $incr))|g" |\
+      sed "s|8099|$((8099 + $incr))|g" \
       > $ROOT/nodes/$i/etc/app.config
 
     i=$(($i+1))
