@@ -5,6 +5,10 @@ ROOT=$(cd `dirname $0`; pwd)
 
 usage() {
   cat<<EOS
+
+Riak multi node setup script for single host.
+=============================================
+
 usage
 -----
   $0 create node_count riak_home
@@ -12,12 +16,15 @@ usage
   $0 start_all
   $0 stop node_id
   $0 stop_all
+  $0 join_all
   $0 clean
 
 example)
-  $0 create 3 /usr/local/riak
-  $0 stop 2
-  $0 start 2
+  $0 create 3 /usr/local/riak : create configurations for 3 nodes.
+  $0 start_all                : start all nodes.
+  $0 join_all                 : make cluster.
+  $0 stop 2                   : stop second node.
+  $0 start 2                  : start second node.
 EOS
 }
 
@@ -82,6 +89,20 @@ stop(){
   $ROOT/nodes/$node/bin/riak stop
 }
 
+join_all(){
+  is_first=true
+  for node in `ls -1 $ROOT/nodes`;do
+    if [[ $is_first  == true ]]; then
+      is_first=false
+      continue
+    fi
+    $ROOT/nodes/$node/bin/riak-admin cluster join riak1
+  done
+  $ROOT/nodes/1/bin/riak-admin cluster plan
+  $ROOT/nodes/1/bin/riak-admin cluster commit
+  $ROOT/nodes/1/bin/riak-admin member-status
+}
+
 required_args(){
   actual=$1
   required=$2
@@ -117,6 +138,9 @@ case $1 in
   stop)
     required_args $# 2
     stop $2
+    ;;
+  join_all)
+    join_all
     ;;
   *)
     usage
