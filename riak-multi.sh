@@ -46,7 +46,7 @@ create_nodes(){
   while [[ $i -le $node_cnt ]];do
     mkdir -pv $ROOT/nodes/$i
 
-    for dir in bin erts-5.9.1 etc lib releases;do
+    for dir in $(ls -1 $riak_home);do
       cp -pr $riak_home/$dir $ROOT/nodes/$i/$dir
     done
 
