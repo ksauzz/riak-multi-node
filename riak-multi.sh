@@ -44,6 +44,7 @@ create_nodes(){
 
   i=1
   while [[ $i -le $node_cnt ]];do
+    echo "creating node$i"
     mkdir -pv $ROOT/nodes/$i
 
     for dir in $(ls -1 $riak_home|grep -v data|grep -v log) ;do
