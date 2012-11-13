@@ -12,12 +12,12 @@ Riak multi node setup script for single host.
 usage
 -----
   $0 create node_count riak_home
-  $0 start node_id
   $0 start_all
-  $0 stop node_id
   $0 stop_all
   $0 join_all
   $0 clean
+  $0 list
+  $0 [start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version] node_id
 
 example)
   $0 create 3 /usr/local/riak : create configurations for 3 nodes.
@@ -66,28 +66,18 @@ create_nodes(){
   done
 }
 
-start_all(){
+command_all(){
+  cmd=$1
   for node in `ls -1 $ROOT/nodes`;do
-    start $node
+    command $cmd $node
   done
 }
 
-start(){
-  node=$1
-  echo "starting node$node"
-  $ROOT/nodes/$node/bin/riak start
-}
-
-stop_all(){
-  for node in `ls -1 $ROOT/nodes`;do
-    stop $node
-  done
-}
-
-stop(){
-  node=$1
-  echo "killing node$node"
-  $ROOT/nodes/$node/bin/riak stop
+command(){
+  cmd=$1
+  node=$2
+  echo "-- send $cmd message to node$node --"
+  $ROOT/nodes/$node/bin/riak $cmd
 }
 
 join_all(){
@@ -102,6 +92,10 @@ join_all(){
   $ROOT/nodes/1/bin/riak-admin cluster plan
   $ROOT/nodes/1/bin/riak-admin cluster commit
   $ROOT/nodes/1/bin/riak-admin member-status
+}
+
+show-nodes(){
+  ls -1 $ROOT/nodes | xargs -n1 echo node
 }
 
 required_args(){
@@ -127,18 +121,20 @@ case $1 in
     clean
     ;;
   start_all)
-    start_all
-    ;;
-  start)
-    required_args $# 2
-    start $2
+    command_all "start"
     ;;
   stop_all)
-    stop_all
+    command_all "stop"
     ;;
-  stop)
+  ping_all)
+    command_all "ping"
+    ;;
+  start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version)
     required_args $# 2
-    stop $2
+    command $1 $2
+    ;;
+  list)
+    show-nodes
     ;;
   join_all)
     join_all
