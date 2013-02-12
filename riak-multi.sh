@@ -15,6 +15,7 @@ usage
   $0 start_all
   $0 stop_all
   $0 join_all
+  $0 ping_all
   $0 clean
   $0 list
   $0 [start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version] node_id
