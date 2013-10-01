@@ -52,16 +52,13 @@ create_nodes(){
       cp -pr $riak_home/$dir $ROOT/nodes/$i/$dir
     done
 
-    cat $riak_home/etc/vm.args |\
-      sed "s|riak@127.0.0.1|riak${i}@127.0.0.1|" \
-      > $ROOT/nodes/$i/etc/vm.args
-
     incr=$((($i-1)*100))
-    cat $riak_home/etc/app.config  |\
+    cat $riak_home/etc/riak.conf  |\
+      sed "s|riak@127.0.0.1|riak${i}@127.0.0.1|" |\
       sed "s|8087|$((8087 + $incr))|g" |\
       sed "s|8098|$((8098 + $incr))|g" |\
       sed "s|8099|$((8099 + $incr))|g" \
-      > $ROOT/nodes/$i/etc/app.config
+      > $ROOT/nodes/$i/etc/riak.conf
 
     i=$(($i+1))
   done
