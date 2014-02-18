@@ -57,7 +57,9 @@ create_nodes(){
       sed "s|riak@127.0.0.1|riak${i}@127.0.0.1|" |\
       sed "s|8087|$((8087 + $incr))|g" |\
       sed "s|8098|$((8098 + $incr))|g" |\
-      sed "s|8099|$((8099 + $incr))|g" \
+      sed "s|8099|$((8099 + $incr))|g" |\
+      sed "s|8093|$((8093 + $incr))|g" |\
+      sed "s|8985|$((8085 + $incr))|g" \
       > $ROOT/nodes/$i/etc/riak.conf
 
     i=$(($i+1))
