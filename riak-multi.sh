@@ -77,7 +77,7 @@ command_all(){
 command(){
   cmd=$1
   node=$2
-  echo "-- send $cmd message to node$node --"
+  echo "-- sending \"$cmd\" message to node$node --"
   $ROOT/nodes/$node/bin/riak $cmd
 }
 
@@ -121,13 +121,13 @@ case $1 in
   clean)
     clean
     ;;
-  start_all)
+  start[_-]all)
     command_all "start"
     ;;
-  stop_all)
+  stop[_-]all)
     command_all "stop"
     ;;
-  ping_all)
+  ping[_-]all)
     command_all "ping"
     ;;
   start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version)
@@ -137,7 +137,7 @@ case $1 in
   list)
     show-nodes
     ;;
-  join_all)
+  join[_-]all)
     join_all
     ;;
   *)
