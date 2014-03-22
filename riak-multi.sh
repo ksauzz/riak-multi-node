@@ -62,6 +62,8 @@ create_nodes(){
       sed "s|8985|$((8085 + $incr))|g" \
       > $ROOT/nodes/$i/etc/riak.conf
 
+    echo "handoff.port = $((8099 + $incr))" >> $ROOT/nodes/$i/etc/riak.conf
+
     i=$(($i+1))
   done
 }
