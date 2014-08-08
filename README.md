@@ -21,7 +21,7 @@ This is the management tool that makes a riak cluster on localhost without `make
 3. make 5 node cluster
 
     ```
-    ./riak-multi.sh create 5 ../riak-2.0.0rc1
+    ./riak-multi.sh create 5 ./riak-2.0.0rc1
     ./riak-multi.sh start_all
     ./riak-multi.sh join_all
     ```
