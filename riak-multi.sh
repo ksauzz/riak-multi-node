@@ -18,7 +18,9 @@ usage
   $0 ping_all
   $0 clean
   $0 list
-  $0 [start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version] node_id
+  $0 transfers
+  $0 tail-log <node_id>
+  $0 [start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version] <node_id>
 
 example)
   $0 create 3 /usr/local/riak : create configurations for 3 nodes.
@@ -57,17 +59,34 @@ create_nodes(){
       cp -pr $riak_home/$dir $node_root/$dir
     done
 
-    incr=$((($i-1)*100))
-    cat $riak_home/etc/riak.conf  |\
-      sed "s|riak@127.0.0.1|riak${i}@127.0.0.1|" |\
-      sed "s|8087|$((8087 + $incr))|g" |\
-      sed "s|8098|$((8098 + $incr))|g" |\
-      sed "s|8099|$((8099 + $incr))|g" |\
-      sed "s|8093|$((8093 + $incr))|g" |\
-      sed "s|8985|$((8085 + $incr))|g" \
-      > $node_root/etc/riak.conf
+    if [ -f $riak_home/etc/riak.conf ]; then
+      echo "  updating $node_root/etc/riak.conf"
+      incr=$((($i-1)*100))
+      cat $riak_home/etc/riak.conf  |\
+        sed "s|riak@127.0.0.1|riak${i}@127.0.0.1|" |\
+        sed "s|8087|$((8087 + $incr))|g" |\
+        sed "s|8098|$((8098 + $incr))|g" |\
+        sed "s|8099|$((8099 + $incr))|g" |\
+        sed "s|8093|$((8093 + $incr))|g" |\
+        sed "s|8985|$((8085 + $incr))|g" \
+        > $node_root/etc/riak.conf
 
-    echo "handoff.port = $((8099 + $incr))" >> $node_root/etc/riak.conf
+      echo "handoff.port = $((8099 + $incr))" >> $node_root/etc/riak.conf
+    else
+      echo "  updating $node_root/etc/vm.args"
+      cat $riak_home/etc/vm.args |\
+        sed "s|riak@127.0.0.1|riak${i}@127.0.0.1|" \
+        > $node_root/etc/vm.args
+
+      echo "  updating $node_root/etc/app.config"
+      incr=$((($i-1)*100))
+      cat $riak_home/etc/app.config  |\
+        sed "s|8087|$((8087 + $incr))|g" |\
+        sed "s|8098|$((8098 + $incr))|g" |\
+        sed "s|8099|$((8099 + $incr))|g" \
+        > $node_root/etc/app.config
+    fi
+
 
     i=$(($i+1))
   done
@@ -145,6 +164,12 @@ case $1 in
     ;;
   join[-_]all)
     join_all
+    ;;
+  transfers)
+    watch -n1 "$ROOT/nodes/bin/$2/riak-admin transfers 2>&1"
+    ;;
+  tail[-_]log)
+    tail -f $ROOT/nodes/$2/log/console.log
     ;;
   *)
     usage
