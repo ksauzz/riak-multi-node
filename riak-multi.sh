@@ -45,11 +45,16 @@ create_nodes(){
 
   i=1
   while [[ $i -le $node_cnt ]];do
+    node_root=$ROOT/nodes/$i
+    if [ -d $node_root ]; then
+      echo "ERROR: $node_root" already exists.
+      exit 1
+    fi
     echo "creating node$i"
-    mkdir -pv $ROOT/nodes/$i
+    mkdir -pv $node_root
 
     for dir in $(ls -1 $riak_home|grep -v log) ;do
-      cp -pr $riak_home/$dir $ROOT/nodes/$i/$dir
+      cp -pr $riak_home/$dir $node_root/$dir
     done
 
     incr=$((($i-1)*100))
@@ -60,9 +65,9 @@ create_nodes(){
       sed "s|8099|$((8099 + $incr))|g" |\
       sed "s|8093|$((8093 + $incr))|g" |\
       sed "s|8985|$((8085 + $incr))|g" \
-      > $ROOT/nodes/$i/etc/riak.conf
+      > $node_root/etc/riak.conf
 
-    echo "handoff.port = $((8099 + $incr))" >> $ROOT/nodes/$i/etc/riak.conf
+    echo "handoff.port = $((8099 + $incr))" >> $node_root/etc/riak.conf
 
     i=$(($i+1))
   done
@@ -122,13 +127,13 @@ case $1 in
   clean)
     clean
     ;;
-  start_all)
+  start[-_]all)
     command_all "start"
     ;;
-  stop_all)
+  stop[-_]all)
     command_all "stop"
     ;;
-  ping_all)
+  ping[-_]all)
     command_all "ping"
     ;;
   start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version)
@@ -138,7 +143,7 @@ case $1 in
   list)
     show-nodes
     ;;
-  join_all)
+  join[-_]all)
     join_all
     ;;
   *)
