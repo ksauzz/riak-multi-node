@@ -31,6 +31,13 @@ example)
 EOS
 }
 
+ensure_file(){
+  if [ `find $ROOT -name $1 | wc -l` -lt 1 ]; then
+    echo "ERROR: $1 is not found"
+    exit 1
+  fi
+}
+
 clean(){
   for node in `ls -1 $ROOT/nodes`;do
     echo "rm $ROOT/nodes/$node"
@@ -170,6 +177,16 @@ case $1 in
     ;;
   tail[-_]log)
     tail -f $ROOT/nodes/$2/log/console.log
+    ;;
+  change[-_]ring[-_]size)
+    required_args $# 2
+    ensure_file "riak.conf"
+    find $ROOT -name riak.conf -exec sed -i.bak 's/## ring_size = 64/ring_size = $2/' {} \;
+    ;;
+  enable[-_]search)
+    ensure_file "riak.conf"
+    find $ROOT -name riak.conf -exec sed -i.bak 's/search = off/search = on/' {} \;
+    find $ROOT -name riak.conf -exec sed -i.bak 's/-Xms1g -Xmx1g/-Xms256m -Xmx256m/' {} \;
     ;;
   *)
     usage
