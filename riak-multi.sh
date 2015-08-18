@@ -188,6 +188,18 @@ case $1 in
     find $ROOT -name riak.conf -exec sed -i.bak 's/search = off/search = on/' {} \;
     find $ROOT -name riak.conf -exec sed -i.bak 's/-Xms1g -Xmx1g/-Xms256m -Xmx256m/' {} \;
     ;;
+  frequent[-_]aae)
+    ensure_file "riak.conf"
+    if [ `grep -c "# frequent aae setting" $ROOT/nodes/1/etc/riak.conf` -lt 0 ]; then
+      echo "already changed."
+    fi
+    find $ROOT -name riak.conf -exec sh -c "echo '# frequent aae setting' >> {}" \;
+    find $ROOT -name riak.conf -exec sh -c "echo 'anti_entropy.tree.build_limit.number = 1' >> {}" \;
+    find $ROOT -name riak.conf -exec sh -c "echo 'anti_entropy.tree.build_limit.per_timespan = 5s' >> {}" \;
+    find $ROOT -name riak.conf -exec sh -c "echo 'anti_entropy.tree.expiry = 30m' >> {}" \;
+    find $ROOT -name riak.conf -exec sh -c "echo 'anti_entropy.concurrency_limit = 10' >> {}" \;
+    find $ROOT -name riak.conf -exec sh -c "echo 'anti_entropy.trigger_interval = 1s' >> {}" \;
+    ;;
   *)
     usage
     ;;
