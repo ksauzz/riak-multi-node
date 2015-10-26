@@ -12,14 +12,17 @@ Riak multi node setup script for single host.
 usage
 -----
   $0 create node_count riak_home
-  $0 start_all
-  $0 stop_all
-  $0 join_all
-  $0 ping_all
+  $0 start-all
+  $0 stop-all
+  $0 join-all
+  $0 ping-all
   $0 clean
   $0 list
   $0 transfers
   $0 tail-log <node_id>
+  $0 change-ring-size <ring size>
+  $0 enable-leveldb
+  $0 enable-serch
   $0 [start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version] <node_id>
 
 example)
@@ -193,6 +196,11 @@ case $1 in
     ensure_file "riak.conf"
     find $ROOT -name riak.conf -exec sed -i.bak 's/search = off/search = on/' {} \;
     find $ROOT -name riak.conf -exec sed -i.bak 's/-Xms1g -Xmx1g/-Xms256m -Xmx256m/' {} \;
+    ;;
+  enable[_-]leveldb)
+    ensure_file "riak.conf"
+    echo "Changing backend to leveldb..."
+    find $ROOT -name riak.conf -exec sed -i.back 's/storage_backend = bitcask/storage_backend = leveldb/' {} \;
     ;;
   frequent[-_]aae)
     ensure_file "riak.conf"
