@@ -77,8 +77,14 @@ create_nodes(){
         sed "s|8093|$((8093 + $incr))|g" |\
         sed "s|8985|$((8085 + $incr))|g" \
         > $node_root/etc/riak.conf
-
       echo "handoff.port = $((8099 + $incr))" >> $node_root/etc/riak.conf
+
+      if [ -f $riak_home/etc/advanced.config ]; then
+        echo "  updating $node_root/etc/advanced.config"
+        cat $riak_home/etc/advanced.config  |\
+          sed "s|9080|$((9080 + $incr))|g" \
+          > $node_root/etc/advanced.config
+      fi
     else
       echo "  updating $node_root/etc/vm.args"
       cat $riak_home/etc/vm.args |\
@@ -90,10 +96,10 @@ create_nodes(){
       cat $riak_home/etc/app.config  |\
         sed "s|8087|$((8087 + $incr))|g" |\
         sed "s|8098|$((8098 + $incr))|g" |\
-        sed "s|8099|$((8099 + $incr))|g" \
+        sed "s|8099|$((8099 + $incr))|g" |\
+        sed "s|9080|$((9080 + $incr))|g" \
         > $node_root/etc/app.config
     fi
-
 
     i=$(($i+1))
   done
