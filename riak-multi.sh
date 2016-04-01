@@ -20,7 +20,7 @@ usage
   $0 list
   $0 transfers
   $0 tail-log <node_id>
-  $0 change-ring-size <ring size>
+  $0 ring-size <ring size>
   $0 enable-leveldb
   $0 enable-serch
   $0 [start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version] <node_id>
@@ -187,10 +187,10 @@ case $1 in
   tail[-_]log)
     tail -f $ROOT/nodes/$2/log/console.log
     ;;
-  change[-_]ring[-_]size)
+  ring[-_]size)
     required_args $# 2
     ensure_file "riak.conf"
-    find $ROOT -name riak.conf -exec sed -i.bak 's/## ring_size = 64/ring_size = $2/' {} \;
+    find $ROOT -name riak.conf -exec sed -i.bak "s/## ring_size = 64/ring_size = $2/" {} \;
     ;;
   enable[-_]search)
     ensure_file "riak.conf"
