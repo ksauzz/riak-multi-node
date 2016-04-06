@@ -21,6 +21,7 @@ usage
   $0 transfers
   $0 tail-log <node_id>
   $0 ring-size <ring size>
+  $0 rename <node_id> <new nodename>
   $0 enable-leveldb
   $0 enable-serch
   $0 [start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version] <node_id>
@@ -108,6 +109,36 @@ create_nodes(){
   done
 }
 
+rename() {
+  node=$1
+  oldname=`nodename $node`
+  newname=$2
+  echo "changing nodename from $oldnode to $newname..."
+  echo "WARN: some functionarities of this tool won't work due to the name"
+  command stop $node 
+  sed -i.back "s/$oldname/$newname/" $ROOT/nodes/$node/etc/riak.conf
+  rm -vrf $ROOT/nodes/$node/data/ring
+  command start $node
+  adm_command $node wait-for-service riak_kv
+  case "$node" in
+    1)
+      adm_command $node cluster join `nodename 2`
+      ;;
+    *)
+      adm_command $node cluster join `nodename 1`
+      ;;
+  esac
+  adm_command $node down $oldname
+  adm_command $node cluster force-replace $oldname $newname
+  adm_command $node cluster plan
+  adm_command $node cluster commit
+}
+
+nodename() {
+  node=$1
+  grep nodename $ROOT/nodes/$node/etc/riak.conf | awk '{print $3}'
+}
+
 command_all(){
   cmd=$1
   for node in `ls -1 $ROOT/nodes`;do
@@ -120,6 +151,13 @@ command(){
   node=$2
   echo "-- send $cmd message to node$node --"
   $ROOT/nodes/$node/bin/riak $cmd
+}
+
+adm_command(){
+  node=$1
+  shift
+  echo "-- send riak-admin "$@" message to node$node --"
+  $ROOT/nodes/$node/bin/riak-admin "$@"
 }
 
 join_all(){
@@ -187,6 +225,12 @@ case $1 in
   tail[-_]log)
     tail -f $ROOT/nodes/$2/log/console.log
     ;;
+  rename)
+    required_args $# 2
+    ensure_file "riak.conf"
+    shift
+    rename $@
+    ;;
   ring[-_]size)
     required_args $# 2
     ensure_file "riak.conf"
@@ -216,5 +260,6 @@ case $1 in
     ;;
   *)
     usage
+    exit 1
     ;;
 esac
